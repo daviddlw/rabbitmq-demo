@@ -38,17 +38,24 @@ public class TestRabbitMQ {
 	private static String HUPU_QUEUE_KEY = "hupu_test_queue";
 
 	@Test
+	public void testStompProtocol() {
+		RabbitMQService.publicMessage("greetings", "大虎扑");
+	}
+
+	
+	@Test
 	public void testRabbitMQServiceSend() {
 		RabbitMQService.publicMessage(HUPU_QUEUE_KEY, HUPU_ROUTE_KEY, "我爱你中国" + sdf.format(new Date()));
-//		RabbitMQService.publicMessage(HUPU_ROUTE_KEY, "我爱你中国" + sdf.format(new Date()));
+		// RabbitMQService.publicMessage(HUPU_ROUTE_KEY, "我爱你中国" +
+		// sdf.format(new Date()));
 	}
 
 	@Test
 	public void testRabbitMQServiceRecevie() {
 		RabbitMQService.receiveMessage(HUPU_QUEUE_KEY, HUPU_ROUTE_KEY);
-//		RabbitMQService.receiveMessage(HUPU_ROUTE_KEY);
+		// RabbitMQService.receiveMessage(HUPU_ROUTE_KEY);
 	}
-	
+
 	@Test
 	public void testRabbitMQServiceRecevie2() {
 		RabbitMQService.receiveMessage(HUPU_QUEUE_KEY, HUPU_ROUTE_KEY);

@@ -1,12 +1,21 @@
 package com.hupu.service;
 
-import com.google.common.base.Charsets;
-import com.rabbitmq.client.*;
+import java.io.IOException;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.io.IOException;
+import com.google.common.base.Charsets;
+import com.rabbitmq.client.AMQP;
+import com.rabbitmq.client.Channel;
+import com.rabbitmq.client.Connection;
+import com.rabbitmq.client.ConnectionFactory;
+import com.rabbitmq.client.ConsumerCancelledException;
+import com.rabbitmq.client.DefaultConsumer;
+import com.rabbitmq.client.Envelope;
+import com.rabbitmq.client.MessageProperties;
+import com.rabbitmq.client.QueueingConsumer;
+import com.rabbitmq.client.ShutdownSignalException;
 
 public class RabbitMQService {
 	private static final Logger logger = LoggerFactory.getLogger(RabbitMQService.class);
@@ -36,18 +45,18 @@ public class RabbitMQService {
 		try {
 			connection = factory.newConnection();
 			channel = connection.createChannel();
-			channel.exchangeDeclare(EXCHANGE_NAME, EXCHANGE_TYPE, true);			
+			channel.exchangeDeclare(EXCHANGE_NAME, EXCHANGE_TYPE, true);
 		} catch (Exception ex) {
 			logger.error("newConnection", ex);
 		}
 	}
-	
+
 	public static void publicMessage(String queue, String routingKey, String message) {
 
 		try {
 			channel.queueDeclare(queue, false, false, false, null);
 			channel.queueBind(queue, EXCHANGE_NAME, routingKey);
-			
+
 			byte[] bytes = message.getBytes(Charsets.UTF_8);
 			channel.basicPublish(EXCHANGE_NAME, routingKey, MessageProperties.PERSISTENT_TEXT_PLAIN, bytes);
 			logger.info(String.format("Send message: [%s], routeKey: %s", message, routingKey));
@@ -81,7 +90,7 @@ public class RabbitMQService {
 			logger.error(e.getMessage(), e);
 		}
 	}
-	
+
 	public static void receiveMessage(String routingKey) {
 		QueueingConsumer qc = new QueueingConsumer(channel);
 		try {

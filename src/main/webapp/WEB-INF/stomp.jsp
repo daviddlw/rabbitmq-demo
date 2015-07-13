@@ -22,17 +22,23 @@
 		/*var socket = new SockJS('/test');
 		stompClient = Stomp.over(socket);*/
 
-		var url = "ws://localhost:8080/rabbitmq-demo/mq";
+		var url = "ws://192.168.9.76:8080/rabbitmq-demo/mq";
 		stompClient = Stomp.client(url);
+		var headers = {
+			login : "guest",
+			passcode : "guest"
+		};
 
 		stompClient.connect({}, function(frame) {
 			setConnected(true);
 			console.log('Connected: ' + frame);
 			//订阅
-			stompClient.subscribe('/queue/greetings', function(greeting) {
+			stompClient.subscribe('/topic/greetings', function(greeting) {
 				//"amq.topic", "greetings"
-				showGreeting(JSON.parse(greeting.body).name);
+				alert(greeting);
+				//showGreeting(JSON.parse(greeting.body).name);
 			}, {
+
 				"persistent" : true,
 				"id" : "mchen"
 			});
@@ -46,8 +52,9 @@
 	}
 
 	function sendName() {
+
 		var name = document.getElementById('name').value;
-		stompClient.send("/queue/greetings", {}, JSON.stringify({
+		stompClient.send("/topic/greetings", {}, JSON.stringify({
 			'name' : name
 		}));
 	}

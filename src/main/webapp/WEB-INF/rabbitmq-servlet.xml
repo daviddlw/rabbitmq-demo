@@ -9,7 +9,7 @@
 
 	<context:component-scan base-package="com.hupu.controller"></context:component-scan>
 	<context:component-scan base-package="com.hupu.conf"></context:component-scan>
-	<context:component-scan base-package="com.hupu.filter"></context:component-scan>
+	<!-- <context:component-scan base-package="com.hupu.filter"></context:component-scan> -->
 
 	<!-- 有了扫描包注解就不需要另外自己配置下面的context:annotation-config 作用是向spring注入一下4个东西 AutowiredAnnotationBeanPostProcessor,CommonAnnotationBeanPostProcessor, 
 		PersistenceAnnotationBeanPostProcessor,RequiredAnnotationBeanPostProcessor -->
@@ -22,6 +22,7 @@
 		<mvc:default-servlet-handler/> <mvc:resources mapping="/images/**" location="/WEB-INF/images/" 
 		/> <mvc:resources mapping="/css/**" location="/WEB-INF/css/" /> <mvc:resources 
 		mapping="/js/**" location="/WEB-INF/js/" /> -->
+		
 	<mvc:resources location="/javascript/" mapping="/js/**" />
 
 	<!-- 针对页面处理 -->

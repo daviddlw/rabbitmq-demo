@@ -2,7 +2,6 @@ package com.hupu.conf;
 
 import org.apache.log4j.Logger;
 import org.springframework.context.annotation.Bean;
-import org.springframework.context.annotation.ComponentScan;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.messaging.simp.config.MessageBrokerRegistry;
 import org.springframework.messaging.simp.config.StompBrokerRelayRegistration;
@@ -30,11 +29,10 @@ public class WebSocketConfig extends AbstractWebSocketMessageBrokerConfigurer {
 		StompBrokerRelayRegistration relayRegistration = config.enableStompBrokerRelay("/topic");
 		logger.info("server: " + CommonUtils.RABBITMQ_SERVER + ", port: " + CommonUtils.RABBITMQ_PORT);
 		relayRegistration.setRelayHost(CommonUtils.RABBITMQ_SERVER);
-//		relayRegistration.setRelayPort(CommonUtils.RABBITMQ_PORT);
 	}
 
 	@Override
 	public void registerStompEndpoints(StompEndpointRegistry registry) {
-		registry.addEndpoint("/mq").withSockJS();
+		registry.addEndpoint("/mq");//.withSockJS();
 	}
 }
