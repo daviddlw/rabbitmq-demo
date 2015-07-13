@@ -2,7 +2,10 @@ package com.hupu.test;
 
 import java.io.IOException;
 import java.text.SimpleDateFormat;
+import java.util.Arrays;
 import java.util.Date;
+import java.util.List;
+import java.util.Random;
 
 import org.apache.log4j.Logger;
 import org.junit.Test;
@@ -12,6 +15,7 @@ import com.rabbitmq.client.Channel;
 import com.rabbitmq.client.Connection;
 import com.rabbitmq.client.ConnectionFactory;
 import com.rabbitmq.client.ConsumerCancelledException;
+import com.rabbitmq.client.MessageProperties;
 import com.rabbitmq.client.QueueingConsumer;
 import com.rabbitmq.client.ShutdownSignalException;
 
@@ -36,13 +40,13 @@ public class TestRabbitMQ {
 	private SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
 	private static String HUPU_ROUTE_KEY = "hupu_test_route";
 	private static String HUPU_QUEUE_KEY = "hupu_test_queue";
+	private static String TASK_QUEUE_NAME = "task_queue";
 
 	@Test
 	public void testStompProtocol() {
 		RabbitMQService.publicMessage("greetings", "大虎扑");
 	}
 
-	
 	@Test
 	public void testRabbitMQServiceSend() {
 		RabbitMQService.publicMessage(HUPU_QUEUE_KEY, HUPU_ROUTE_KEY, "我爱你中国" + sdf.format(new Date()));
@@ -277,4 +281,64 @@ public class TestRabbitMQ {
 		}
 	}
 
+	@Test
+	public void testNewTaskMQProducer() {
+		ConnectionFactory factory = new ConnectionFactory();
+		factory.setHost(HOST_SERVER);
+		factory.setPort(HOST_PORT);
+
+		try {
+			Connection conn = factory.newConnection();
+			Channel channel = conn.createChannel();
+
+			channel.queueDeclare(TASK_QUEUE_NAME, true, false, false, null);
+			Random rand = new Random();
+			List<String> ls = Arrays.asList(new String[] { "aa", "bb", "cc", "dd", "ee", "ff", "gg" });
+			String message = ls.get(rand.nextInt(ls.size()));
+
+			channel.basicPublish("", TASK_QUEUE_NAME, MessageProperties.PERSISTENT_TEXT_PLAIN, message.getBytes());
+			System.out.println("sent message: " + message);
+			
+			channel.close();
+			conn.close();
+
+		} catch (IOException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+	}
+	
+	@Test
+	public void testNewWorkMQConsumer() {
+		ConnectionFactory factory = new ConnectionFactory();
+		factory.setHost(HOST_SERVER);
+		factory.setPort(HOST_PORT);
+		
+		try {
+			Connection conn = factory.newConnection();
+			Channel channel = conn.createChannel();
+			
+			channel.queueDeclare(TASK_QUEUE_NAME, true, false, false, null);
+			System.out.println("Waiting for message...");
+			channel.basicQos(1);
+			
+			QueueingConsumer qc = new QueueingConsumer(channel);
+			channel.basicConsume(TASK_QUEUE_NAME, false, qc);
+			
+			while (true) {
+				QueueingConsumer.Delivery delivery = qc.nextDelivery();
+				String message = new String(delivery.getBody());
+				
+				System.out.println("Received: "+message);
+				for (int i = 0; i < message.toCharArray().length; i++) {
+					Thread.sleep(3000);
+				}
+				System.out.println("Done...");
+				channel.basicAck(delivery.getEnvelope().getDeliveryTag(), false);
+			}
+						
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
+	}
 }
