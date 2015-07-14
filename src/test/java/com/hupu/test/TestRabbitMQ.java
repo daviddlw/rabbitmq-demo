@@ -1,18 +1,18 @@
 package com.hupu.test;
 
 import java.io.IOException;
-import java.sql.Time;
 import java.text.SimpleDateFormat;
-import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Date;
 import java.util.List;
-import java.util.Random;
 import java.util.concurrent.TimeUnit;
 
+import org.apache.commons.lang3.StringUtils;
 import org.apache.log4j.Logger;
 import org.junit.Test;
 
+import com.hupu.mq.CommonUtils;
+import com.hupu.mq.MessageRunnable;
 import com.hupu.service.RabbitMQService;
 import com.rabbitmq.client.Channel;
 import com.rabbitmq.client.Connection;
@@ -28,6 +28,7 @@ public class TestRabbitMQ {
 
 	private static final String QUEUE_NAME = "hello_queue";
 	private static final String EXCHANGE_NAME = "hello_exchange";
+	private static final String EXCHANGE_NAME_DIRECT = CommonUtils.EXCHANGE_NAME_DIRECT;
 	// 一个队列两个交换机
 	private static final String NEW_EXCHANGE = "new_exchange";
 	private static final String QUEUE_A = "queue_a";
@@ -38,12 +39,15 @@ public class TestRabbitMQ {
 	private static final String ROUTE_A = "route_a";
 	private static final String ROUTE_B = "route_b";
 
-	private static final String HOST_SERVER = "192.168.9.74";
-	private static final int HOST_PORT = 5672;
-	private SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
+	private static final String HOST_SERVER = CommonUtils.HOST_SERVER;
+	private static final int HOST_PORT = CommonUtils.HOST_PORT;
+	private SimpleDateFormat sdf = CommonUtils.sdf;
 	private static String HUPU_ROUTE_KEY = "hupu_test_route";
 	private static String HUPU_QUEUE_KEY = "hupu_test_queue";
 	private static String TASK_QUEUE_NAME = "task_queue";
+	private static List<String> ls = CommonUtils.ls;
+	private static List<String> routingMessageLs = CommonUtils.routingMessageLs;
+	private static List<String> routingKeyLs = CommonUtils.routingKeyLs;
 
 	@Test
 	public void testStompProtocol() {
@@ -284,6 +288,10 @@ public class TestRabbitMQ {
 		}
 	}
 
+	private String getMessage(int i) {
+		return ls.get(i);
+	}
+
 	@Test
 	public void testNewTaskMQProducer() {
 		ConnectionFactory factory = new ConnectionFactory();
@@ -296,10 +304,9 @@ public class TestRabbitMQ {
 
 			// durable=true保证mq重启后任务不会消失
 			channel.queueDeclare(TASK_QUEUE_NAME, true, false, false, null);
-			List<String> ls = Arrays.asList(new String[] { "daviddai", "mongodb", "we are family", "running man", "rabbitmq", "zabbix", "nginx" });
 
 			for (int i = 0; i < ls.size(); i++) {
-				String message = ls.get(i);
+				String message = getMessage(i);
 
 				// MessageProperties.PERSISTENT_TEXT_PLAIN持久化文本
 				channel.basicPublish("", TASK_QUEUE_NAME, MessageProperties.PERSISTENT_TEXT_PLAIN, message.getBytes());
@@ -355,4 +362,118 @@ public class TestRabbitMQ {
 			e.printStackTrace();
 		}
 	}
+
+	@Test
+	public void testPubAndSubProducer() {
+		ConnectionFactory factory = new ConnectionFactory();
+		factory.setHost(HOST_SERVER);
+		factory.setPort(HOST_PORT);
+
+		try {
+			Connection conn = factory.newConnection();
+			Channel channel = conn.createChannel();
+
+			channel.exchangeDeclare(EXCHANGE_NAME, "fanout");
+			for (int i = 0; i < ls.size(); i++) {
+				String message = getMessage(i);
+				channel.basicPublish(EXCHANGE_NAME, "", null, message.getBytes());
+				System.out.println("sent message: " + message);
+				TimeUnit.SECONDS.sleep(1);
+			}
+
+			channel.close();
+			conn.close();
+		} catch (IOException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		} catch (InterruptedException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+	}
+
+	@Test
+	public void testPubAndSubConsumer() {
+		ConnectionFactory factory = new ConnectionFactory();
+		factory.setHost(HOST_SERVER);
+		factory.setPort(HOST_PORT);
+
+		try {
+			Connection conn = factory.newConnection();
+			Channel channel = conn.createChannel();
+
+			channel.exchangeDeclare(EXCHANGE_NAME, "fanout");
+			String queue = channel.queueDeclare().getQueue();
+
+			channel.queueBind(queue, EXCHANGE_NAME, "");
+
+			System.out.println("Waiting for message..." + sdf.format(new Date()));
+
+			QueueingConsumer qc = new QueueingConsumer(channel);
+			channel.basicConsume(queue, true, qc);
+
+			while (true) {
+				QueueingConsumer.Delivery delivery = qc.nextDelivery();
+				String message = new String(delivery.getBody());
+				System.out.println("Received: " + message);
+			}
+		} catch (IOException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		} catch (ShutdownSignalException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		} catch (ConsumerCancelledException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		} catch (InterruptedException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+	}
+
+	@Test
+	public void testRoutingProducer() {
+		ConnectionFactory factory = new ConnectionFactory();
+		factory.setHost(HOST_SERVER);
+		factory.setPort(HOST_PORT);
+
+		try {
+			Connection conn = factory.newConnection();
+			Channel channel = conn.createChannel();
+
+			channel.exchangeDeclare(EXCHANGE_NAME_DIRECT, "direct");
+			String routingKey = StringUtils.EMPTY;
+			String message = StringUtils.EMPTY;
+			for (int i = 0; i < routingKeyLs.size(); i++) {
+				routingKey = routingKeyLs.get(i);
+				message = routingMessageLs.get(i);
+
+				channel.basicPublish(EXCHANGE_NAME_DIRECT, routingKey, null, message.getBytes());
+				System.out.println("sent message: " + message);
+			}
+
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
+
+	}
+
+	@Test
+	public void testRoutingConsumer() {
+		try {
+			for (int i = 0; i < routingKeyLs.size(); i++) {
+				MessageRunnable mr = new MessageRunnable(i, routingKeyLs);
+				Thread t = new Thread(mr);
+				t.setDaemon(true);
+				TimeUnit.SECONDS.sleep(1);
+				t.start();
+			}
+
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
+
+	}
+
 }
