@@ -14,7 +14,10 @@ import org.junit.Test;
 
 import com.hupu.mq.CommonUtils;
 import com.hupu.mq.MessageRunnable;
+import com.hupu.mq.RpcClient;
+import com.hupu.mq.RpcServer;
 import com.hupu.service.RabbitMQService;
+import com.rabbitmq.client.BasicProperties;
 import com.rabbitmq.client.Channel;
 import com.rabbitmq.client.Connection;
 import com.rabbitmq.client.ConnectionFactory;
@@ -23,7 +26,8 @@ import com.rabbitmq.client.MessageProperties;
 import com.rabbitmq.client.QueueingConsumer;
 import com.rabbitmq.client.ShutdownSignalException;
 
-public class TestRabbitMQ {
+public class TestRabbitMQ
+{
 
 	private Logger logger = Logger.getLogger(TestRabbitMQ.class);
 
@@ -51,35 +55,41 @@ public class TestRabbitMQ {
 	private static List<String> routingKeyLs = CommonUtils.routingKeyLs;
 
 	@Test
-	public void testStompProtocol() {
+	public void testStompProtocol()
+	{
 		RabbitMQService.publicMessage("greetings", "大虎扑");
 	}
 
 	@Test
-	public void testRabbitMQServiceSend() {
+	public void testRabbitMQServiceSend()
+	{
 		RabbitMQService.publicMessage(HUPU_QUEUE_KEY, HUPU_ROUTE_KEY, "我爱你中国" + sdf.format(new Date()));
 		// RabbitMQService.publicMessage(HUPU_ROUTE_KEY, "我爱你中国" +
 		// sdf.format(new Date()));
 	}
 
 	@Test
-	public void testRabbitMQServiceRecevie() {
+	public void testRabbitMQServiceRecevie()
+	{
 		RabbitMQService.receiveMessage(HUPU_QUEUE_KEY, HUPU_ROUTE_KEY);
 		// RabbitMQService.receiveMessage(HUPU_ROUTE_KEY);
 	}
 
 	@Test
-	public void testRabbitMQServiceRecevie2() {
+	public void testRabbitMQServiceRecevie2()
+	{
 		RabbitMQService.receiveMessage(HUPU_QUEUE_KEY, HUPU_ROUTE_KEY);
 	}
 
 	@Test
-	public void testRabbitExchangeWithMutipleQueueProducer() {
+	public void testRabbitExchangeWithMutipleQueueProducer()
+	{
 		ConnectionFactory factory = new ConnectionFactory();
 		factory.setHost(HOST_SERVER);
 		factory.setPort(HOST_PORT);
 
-		try {
+		try
+		{
 			Connection conn = factory.newConnection();
 			Channel channel = conn.createChannel();
 
@@ -102,19 +112,22 @@ public class TestRabbitMQ {
 			channel.close();
 			conn.close();
 
-		} catch (IOException e) {
+		} catch (IOException e)
+		{
 			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
 	}
 
 	@Test
-	public void testRabbitExchangeWithMutipleQueueConsumerA() {
+	public void testRabbitExchangeWithMutipleQueueConsumerA()
+	{
 		ConnectionFactory factory = new ConnectionFactory();
 		factory.setHost(HOST_SERVER);
 		factory.setPort(HOST_PORT);
 
-		try {
+		try
+		{
 			Connection conn = factory.newConnection();
 			Channel channel = conn.createChannel();
 
@@ -124,34 +137,41 @@ public class TestRabbitMQ {
 			QueueingConsumer qc = new QueueingConsumer(channel);
 			channel.basicConsume(QUEUE_A, true, qc);
 
-			while (true) {
+			while (true)
+			{
 				QueueingConsumer.Delivery delivery = qc.nextDelivery();
 				String message = new String(delivery.getBody());
 				logger.info("message： " + message);
 			}
 
-		} catch (IOException e) {
+		} catch (IOException e)
+		{
 			// TODO Auto-generated catch block
 			e.printStackTrace();
-		} catch (ShutdownSignalException e) {
+		} catch (ShutdownSignalException e)
+		{
 			// TODO Auto-generated catch block
 			e.printStackTrace();
-		} catch (ConsumerCancelledException e) {
+		} catch (ConsumerCancelledException e)
+		{
 			// TODO Auto-generated catch block
 			e.printStackTrace();
-		} catch (InterruptedException e) {
+		} catch (InterruptedException e)
+		{
 			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
 	}
 
 	@Test
-	public void testRabbitExchangeWithMutipleQueueConsumerB() {
+	public void testRabbitExchangeWithMutipleQueueConsumerB()
+	{
 		ConnectionFactory factory = new ConnectionFactory();
 		factory.setHost(HOST_SERVER);
 		factory.setPort(HOST_PORT);
 
-		try {
+		try
+		{
 			Connection conn = factory.newConnection();
 			Channel channel = conn.createChannel();
 
@@ -161,34 +181,41 @@ public class TestRabbitMQ {
 			QueueingConsumer qc = new QueueingConsumer(channel);
 			channel.basicConsume(QUEUE_B, true, qc);
 
-			while (true) {
+			while (true)
+			{
 				QueueingConsumer.Delivery delivery = qc.nextDelivery();
 				String message = new String(delivery.getBody());
 				logger.info("message： " + message);
 			}
 
-		} catch (IOException e) {
+		} catch (IOException e)
+		{
 			// TODO Auto-generated catch block
 			e.printStackTrace();
-		} catch (ShutdownSignalException e) {
+		} catch (ShutdownSignalException e)
+		{
 			// TODO Auto-generated catch block
 			e.printStackTrace();
-		} catch (ConsumerCancelledException e) {
+		} catch (ConsumerCancelledException e)
+		{
 			// TODO Auto-generated catch block
 			e.printStackTrace();
-		} catch (InterruptedException e) {
+		} catch (InterruptedException e)
+		{
 			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
 	}
 
 	@Test
-	public void testRabbitExchangeMQProducer() {
+	public void testRabbitExchangeMQProducer()
+	{
 		ConnectionFactory factory = new ConnectionFactory();
 		factory.setHost(HOST_SERVER);
 		factory.setPort(HOST_PORT);
 
-		try {
+		try
+		{
 			Connection conn = factory.newConnection();
 			Channel channel = conn.createChannel();
 
@@ -200,19 +227,22 @@ public class TestRabbitMQ {
 
 			channel.close();
 			conn.close();
-		} catch (IOException e) {
+		} catch (IOException e)
+		{
 			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
 	}
 
 	@Test
-	public void testRabbitExchangeMQConsumer() {
+	public void testRabbitExchangeMQConsumer()
+	{
 		ConnectionFactory factory = new ConnectionFactory();
 		factory.setHost(HOST_SERVER);
 		factory.setPort(HOST_PORT);
 
-		try {
+		try
+		{
 			Connection conn = factory.newConnection();
 			Channel channel = conn.createChannel();
 
@@ -222,23 +252,27 @@ public class TestRabbitMQ {
 			QueueingConsumer qc = new QueueingConsumer(channel);
 			channel.basicConsume(QUEUE_NAME, true, qc);
 
-			while (true) {
+			while (true)
+			{
 				QueueingConsumer.Delivery delivery = qc.nextDelivery(); // 阻塞知道介绍一条消息
 				String result = new String(delivery.getBody());
 				logger.info(result);
 			}
 
-		} catch (Exception e) {
+		} catch (Exception e)
+		{
 			// TODO: handle exception
 		}
 	}
 
 	@Test
-	public void testRabbitSimpleMQProducer() {
+	public void testRabbitSimpleMQProducer()
+	{
 		ConnectionFactory factory = new ConnectionFactory();
 		factory.setHost(HOST_SERVER);
 		factory.setPort(HOST_PORT);
-		try {
+		try
+		{
 			Connection conn = factory.newConnection();
 			Channel channel = conn.createChannel();
 			channel.queueDeclare(QUEUE_NAME, false, false, false, null); // (如果没有就)创建Queue
@@ -249,18 +283,21 @@ public class TestRabbitMQ {
 
 			channel.close();
 			conn.close();
-		} catch (IOException e) {
+		} catch (IOException e)
+		{
 			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
 	}
 
 	@Test
-	public void testRabbitSimpleMQConsumer() {
+	public void testRabbitSimpleMQConsumer()
+	{
 		ConnectionFactory factory = new ConnectionFactory();
 		factory.setHost(HOST_SERVER);
 		factory.setPort(HOST_PORT);
-		try {
+		try
+		{
 			Connection conn = factory.newConnection();
 			Channel channel = conn.createChannel();
 
@@ -269,44 +306,53 @@ public class TestRabbitMQ {
 			QueueingConsumer qc = new QueueingConsumer(channel);
 			channel.basicConsume(QUEUE_NAME, true, qc);
 
-			while (true) {
+			while (true)
+			{
 				QueueingConsumer.Delivery delivery = qc.nextDelivery(); // 阻塞知道介绍一条消息
 				String result = new String(delivery.getBody());
 				logger.info(result);
 			}
-		} catch (IOException e) {
+		} catch (IOException e)
+		{
 			// TODO Auto-generated catch block
 			e.printStackTrace();
-		} catch (ShutdownSignalException e) {
+		} catch (ShutdownSignalException e)
+		{
 			// TODO Auto-generated catch block
 			e.printStackTrace();
-		} catch (ConsumerCancelledException e) {
+		} catch (ConsumerCancelledException e)
+		{
 			// TODO Auto-generated catch block
 			e.printStackTrace();
-		} catch (InterruptedException e) {
+		} catch (InterruptedException e)
+		{
 			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
 	}
 
-	private String getMessage(int i) {
+	private String getMessage(int i)
+	{
 		return ls.get(i);
 	}
 
 	@Test
-	public void testNewTaskMQProducer() {
+	public void testNewTaskMQProducer()
+	{
 		ConnectionFactory factory = new ConnectionFactory();
 		factory.setHost(HOST_SERVER);
 		factory.setPort(HOST_PORT);
 
-		try {
+		try
+		{
 			Connection conn = factory.newConnection();
 			Channel channel = conn.createChannel();
 
 			// durable=true保证mq重启后任务不会消失
 			channel.queueDeclare(TASK_QUEUE_NAME, true, false, false, null);
 
-			for (int i = 0; i < ls.size(); i++) {
+			for (int i = 0; i < ls.size(); i++)
+			{
 				String message = getMessage(i);
 
 				// MessageProperties.PERSISTENT_TEXT_PLAIN持久化文本
@@ -318,22 +364,26 @@ public class TestRabbitMQ {
 			channel.close();
 			conn.close();
 
-		} catch (IOException e) {
+		} catch (IOException e)
+		{
 			// TODO Auto-generated catch block
 			e.printStackTrace();
-		} catch (InterruptedException e) {
+		} catch (InterruptedException e)
+		{
 			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
 	}
 
 	@Test
-	public void testNewWorkMQConsumer() {
+	public void testNewWorkMQConsumer()
+	{
 		ConnectionFactory factory = new ConnectionFactory();
 		factory.setHost(HOST_SERVER);
 		factory.setPort(HOST_PORT);
 
-		try {
+		try
+		{
 			Connection conn = factory.newConnection();
 			Channel channel = conn.createChannel();
 
@@ -346,12 +396,14 @@ public class TestRabbitMQ {
 			QueueingConsumer qc = new QueueingConsumer(channel);
 			channel.basicConsume(TASK_QUEUE_NAME, false, qc);
 
-			while (true) {
+			while (true)
+			{
 				QueueingConsumer.Delivery delivery = qc.nextDelivery();
 				String message = new String(delivery.getBody());
 
 				System.out.println("Received: " + message);
-				for (int i = 0; i < message.toCharArray().length; i++) {
+				for (int i = 0; i < message.toCharArray().length; i++)
+				{
 					Thread.sleep(1000);
 				}
 				System.out.println("Done...");
@@ -359,23 +411,27 @@ public class TestRabbitMQ {
 				channel.basicAck(delivery.getEnvelope().getDeliveryTag(), false);
 			}
 
-		} catch (Exception e) {
+		} catch (Exception e)
+		{
 			e.printStackTrace();
 		}
 	}
 
 	@Test
-	public void testPubAndSubProducer() {
+	public void testPubAndSubProducer()
+	{
 		ConnectionFactory factory = new ConnectionFactory();
 		factory.setHost(HOST_SERVER);
 		factory.setPort(HOST_PORT);
 
-		try {
+		try
+		{
 			Connection conn = factory.newConnection();
 			Channel channel = conn.createChannel();
 
 			channel.exchangeDeclare(EXCHANGE_NAME, "fanout");
-			for (int i = 0; i < ls.size(); i++) {
+			for (int i = 0; i < ls.size(); i++)
+			{
 				String message = getMessage(i);
 				channel.basicPublish(EXCHANGE_NAME, "", null, message.getBytes());
 				System.out.println("sent message: " + message);
@@ -384,22 +440,26 @@ public class TestRabbitMQ {
 
 			channel.close();
 			conn.close();
-		} catch (IOException e) {
+		} catch (IOException e)
+		{
 			// TODO Auto-generated catch block
 			e.printStackTrace();
-		} catch (InterruptedException e) {
+		} catch (InterruptedException e)
+		{
 			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
 	}
 
 	@Test
-	public void testPubAndSubConsumer() {
+	public void testPubAndSubConsumer()
+	{
 		ConnectionFactory factory = new ConnectionFactory();
 		factory.setHost(HOST_SERVER);
 		factory.setPort(HOST_PORT);
 
-		try {
+		try
+		{
 			Connection conn = factory.newConnection();
 			Channel channel = conn.createChannel();
 
@@ -413,40 +473,48 @@ public class TestRabbitMQ {
 			QueueingConsumer qc = new QueueingConsumer(channel);
 			channel.basicConsume(queue, true, qc);
 
-			while (true) {
+			while (true)
+			{
 				QueueingConsumer.Delivery delivery = qc.nextDelivery();
 				String message = new String(delivery.getBody());
 				System.out.println("Received: " + message);
 			}
-		} catch (IOException e) {
+		} catch (IOException e)
+		{
 			// TODO Auto-generated catch block
 			e.printStackTrace();
-		} catch (ShutdownSignalException e) {
+		} catch (ShutdownSignalException e)
+		{
 			// TODO Auto-generated catch block
 			e.printStackTrace();
-		} catch (ConsumerCancelledException e) {
+		} catch (ConsumerCancelledException e)
+		{
 			// TODO Auto-generated catch block
 			e.printStackTrace();
-		} catch (InterruptedException e) {
+		} catch (InterruptedException e)
+		{
 			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
 	}
 
 	@Test
-	public void testRoutingProducer() {
+	public void testRoutingProducer()
+	{
 		ConnectionFactory factory = new ConnectionFactory();
 		factory.setHost(HOST_SERVER);
 		factory.setPort(HOST_PORT);
 
-		try {
+		try
+		{
 			Connection conn = factory.newConnection();
 			Channel channel = conn.createChannel();
 
 			channel.exchangeDeclare(EXCHANGE_NAME_DIRECT, "direct");
 			String routingKey = StringUtils.EMPTY;
 			String message = StringUtils.EMPTY;
-			for (int i = 0; i < routingKeyLs.size(); i++) {
+			for (int i = 0; i < routingKeyLs.size(); i++)
+			{
 				routingKey = routingKeyLs.get(i);
 				message = routingMessageLs.get(i);
 
@@ -456,18 +524,21 @@ public class TestRabbitMQ {
 
 			channel.basicPublish(EXCHANGE_NAME_DIRECT, "info", null, "info_new".getBytes());
 
-		} catch (Exception e) {
+		} catch (Exception e)
+		{
 			e.printStackTrace();
 		}
 	}
 
 	@Test
-	public void testTopicProducer() {
+	public void testTopicProducer()
+	{
 		ConnectionFactory factory = new ConnectionFactory();
 		factory.setHost(HOST_SERVER);
 		factory.setPort(HOST_PORT);
 
-		try {
+		try
+		{
 			Connection conn = factory.newConnection();
 			Channel channel = conn.createChannel();
 
@@ -479,21 +550,75 @@ public class TestRabbitMQ {
 
 			channel.basicPublish(CommonUtils.EXCHANGE_NAME_TOPIC, routingKey, null, message.getBytes());
 
-			for (int i = 0; i < CommonUtils.topicKeysLs.size(); i++) {
+			for (int i = 0; i < CommonUtils.topicKeysLs.size(); i++)
+			{
 				message = CommonUtils.topicMessageLs.get(r.nextInt(CommonUtils.topicMessageLs.size()));
 				System.out.println("message: " + message);
-				if (message.contains("orange")) {
+				if (message.contains("orange"))
+				{
 					routingKey = "*.orange.*";
-				} else if (message.contains("rabbit")) {
+				} else if (message.contains("rabbit"))
+				{
 					routingKey = "*.*.rabbit";
-				} else if (message.contains("lazy")) {
+				} else if (message.contains("lazy"))
+				{
 					routingKey = "lazy.#";
-				} 
+				}
 				channel.basicPublish(CommonUtils.EXCHANGE_NAME_TOPIC, routingKey, null, message.getBytes());
+
 			}
 
-		} catch (Exception e) {
+		} catch (Exception e)
+		{
 			e.printStackTrace();
 		}
+	}
+
+	@Test
+	public void testRpc()
+	{
+		RpcClient client;
+		try
+		{
+			client = new RpcClient();
+			String result = client.call("10");
+			System.out.println(result);
+
+			client.close();
+		} catch (Exception e)
+		{
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+
+	}
+	
+	
+	
+	@Test
+	public void startServer() throws Exception
+	{
+		RpcServer server = new RpcServer();
+		System.out.println(server);
+	}
+	
+	private int fib(int n)
+	{
+		if (n == 0)
+		{
+			return 0;
+		}
+		if (n == 1)
+		{
+			return 1;
+		}
+
+		return fib(n - 1) + fib(n - 2);
+	}
+	
+	@Test
+	public void testFib()
+	{
+		System.out.println(fib(10));
 	}
 }

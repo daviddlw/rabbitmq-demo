@@ -21,6 +21,7 @@ public class TestApp {
 		System.out.println(CommonUtils.EXCHANGE_NAME);
 		System.out.println(CommonUtils.EXCHANGE_TYPE);
 		System.out.println(CommonUtils.INTERVEL_TIME);
+		
 	}
 
 }

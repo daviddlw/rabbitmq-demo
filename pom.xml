@@ -281,6 +281,19 @@
 	</build>
 	<profiles>
 		<profile>
+			<id>home</id>
+			<properties>
+				<hupu.rabbitmq.server>115.159.62.132</hupu.rabbitmq.server>
+				<hupu.rabbitmq.port>5672</hupu.rabbitmq.port>
+				<hupu.rabbitmq.exchangename>home.topic</hupu.rabbitmq.exchangename>
+				<hupu.rabbitmq.exchangetype>topic</hupu.rabbitmq.exchangetype>
+				<hupu.rabbitmq.interval>0</hupu.rabbitmq.interval>
+			</properties>
+			<activation>
+				<activeByDefault>true</activeByDefault>
+			</activation>
+		</profile>
+		<profile>
 			<id>dev</id>
 			<properties>
 				<hupu.rabbitmq.server>192.168.9.74</hupu.rabbitmq.server>
@@ -292,9 +305,6 @@
 		</profile>
 		<profile>
 			<id>offline</id>
-			<activation>
-				<activeByDefault>true</activeByDefault>
-			</activation>
 			<properties>
 				<hupu.rabbitmq.server>192.168.8.129</hupu.rabbitmq.server>
 				<hupu.rabbitmq.port>5672</hupu.rabbitmq.port>
