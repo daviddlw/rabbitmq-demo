@@ -5,6 +5,7 @@ import java.text.SimpleDateFormat;
 import java.util.Arrays;
 import java.util.Date;
 import java.util.List;
+import java.util.Random;
 import java.util.concurrent.TimeUnit;
 
 import org.apache.commons.lang3.StringUtils;
@@ -453,27 +454,46 @@ public class TestRabbitMQ {
 				System.out.println("sent message: " + message);
 			}
 
+			channel.basicPublish(EXCHANGE_NAME_DIRECT, "info", null, "info_new".getBytes());
+
 		} catch (Exception e) {
 			e.printStackTrace();
 		}
-
 	}
 
 	@Test
-	public void testRoutingConsumer() {
+	public void testTopicProducer() {
+		ConnectionFactory factory = new ConnectionFactory();
+		factory.setHost(HOST_SERVER);
+		factory.setPort(HOST_PORT);
+
 		try {
-			for (int i = 0; i < routingKeyLs.size(); i++) {
-				MessageRunnable mr = new MessageRunnable(i, routingKeyLs);
-				Thread t = new Thread(mr);
-				t.setDaemon(true);
-				TimeUnit.SECONDS.sleep(1);
-				t.start();
+			Connection conn = factory.newConnection();
+			Channel channel = conn.createChannel();
+
+			Random r = new Random();
+
+			channel.exchangeDeclare(CommonUtils.EXCHANGE_NAME_TOPIC, "topic");
+			String routingKey = StringUtils.EMPTY;
+			String message = StringUtils.EMPTY;
+
+			channel.basicPublish(CommonUtils.EXCHANGE_NAME_TOPIC, routingKey, null, message.getBytes());
+
+			for (int i = 0; i < CommonUtils.topicKeysLs.size(); i++) {
+				message = CommonUtils.topicMessageLs.get(r.nextInt(CommonUtils.topicMessageLs.size()));
+				System.out.println("message: " + message);
+				if (message.contains("orange")) {
+					routingKey = "*.orange.*";
+				} else if (message.contains("rabbit")) {
+					routingKey = "*.*.rabbit";
+				} else if (message.contains("lazy")) {
+					routingKey = "lazy.#";
+				} 
+				channel.basicPublish(CommonUtils.EXCHANGE_NAME_TOPIC, routingKey, null, message.getBytes());
 			}
 
 		} catch (Exception e) {
 			e.printStackTrace();
 		}
-
 	}
-
 }
