@@ -1,11 +1,14 @@
 package com.hupu.test;
 
 import java.io.IOException;
+import java.sql.Time;
 import java.text.SimpleDateFormat;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Date;
 import java.util.List;
 import java.util.Random;
+import java.util.concurrent.TimeUnit;
 
 import org.apache.log4j.Logger;
 import org.junit.Test;
@@ -291,52 +294,63 @@ public class TestRabbitMQ {
 			Connection conn = factory.newConnection();
 			Channel channel = conn.createChannel();
 
+			// durable=true保证mq重启后任务不会消失
 			channel.queueDeclare(TASK_QUEUE_NAME, true, false, false, null);
-			Random rand = new Random();
-			List<String> ls = Arrays.asList(new String[] { "aa", "bb", "cc", "dd", "ee", "ff", "gg" });
-			String message = ls.get(rand.nextInt(ls.size()));
+			List<String> ls = Arrays.asList(new String[] { "daviddai", "mongodb", "we are family", "running man", "rabbitmq", "zabbix", "nginx" });
 
-			channel.basicPublish("", TASK_QUEUE_NAME, MessageProperties.PERSISTENT_TEXT_PLAIN, message.getBytes());
-			System.out.println("sent message: " + message);
-			
+			for (int i = 0; i < ls.size(); i++) {
+				String message = ls.get(i);
+
+				// MessageProperties.PERSISTENT_TEXT_PLAIN持久化文本
+				channel.basicPublish("", TASK_QUEUE_NAME, MessageProperties.PERSISTENT_TEXT_PLAIN, message.getBytes());
+				System.out.println("sent message: " + message);
+				TimeUnit.SECONDS.sleep(1);
+			}
+
 			channel.close();
 			conn.close();
 
 		} catch (IOException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
+		} catch (InterruptedException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
 		}
 	}
-	
+
 	@Test
 	public void testNewWorkMQConsumer() {
 		ConnectionFactory factory = new ConnectionFactory();
 		factory.setHost(HOST_SERVER);
 		factory.setPort(HOST_PORT);
-		
+
 		try {
 			Connection conn = factory.newConnection();
 			Channel channel = conn.createChannel();
-			
+
 			channel.queueDeclare(TASK_QUEUE_NAME, true, false, false, null);
-			System.out.println("Waiting for message...");
+
+			System.out.println("Waiting for message..." + sdf.format(new Date()));
+			// 保证消费者处理完一条消息后才能继续处理下一条消息
 			channel.basicQos(1);
-			
+
 			QueueingConsumer qc = new QueueingConsumer(channel);
 			channel.basicConsume(TASK_QUEUE_NAME, false, qc);
-			
+
 			while (true) {
 				QueueingConsumer.Delivery delivery = qc.nextDelivery();
 				String message = new String(delivery.getBody());
-				
-				System.out.println("Received: "+message);
+
+				System.out.println("Received: " + message);
 				for (int i = 0; i < message.toCharArray().length; i++) {
-					Thread.sleep(3000);
+					Thread.sleep(1000);
 				}
 				System.out.println("Done...");
+				// 保证消息的转发如果当前consumer进程挂了
 				channel.basicAck(delivery.getEnvelope().getDeliveryTag(), false);
 			}
-						
+
 		} catch (Exception e) {
 			e.printStackTrace();
 		}
