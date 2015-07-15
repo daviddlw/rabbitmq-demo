@@ -289,9 +289,6 @@
 				<hupu.rabbitmq.exchangetype>topic</hupu.rabbitmq.exchangetype>
 				<hupu.rabbitmq.interval>0</hupu.rabbitmq.interval>
 			</properties>
-			<activation>
-				<activeByDefault>true</activeByDefault>
-			</activation>
 		</profile>
 		<profile>
 			<id>dev</id>
@@ -302,6 +299,9 @@
 				<hupu.rabbitmq.exchangetype>topic</hupu.rabbitmq.exchangetype>
 				<hupu.rabbitmq.interval>0</hupu.rabbitmq.interval>
 			</properties>
+			<activation>
+				<activeByDefault>true</activeByDefault>
+			</activation>
 		</profile>
 		<profile>
 			<id>offline</id>

@@ -125,25 +125,25 @@ public class TestRabbitMQ
 		ConnectionFactory factory = new ConnectionFactory();
 		factory.setHost(HOST_SERVER);
 		factory.setPort(HOST_PORT);
-
+	
 		try
 		{
 			Connection conn = factory.newConnection();
 			Channel channel = conn.createChannel();
-
+	
 			channel.exchangeDeclare(NEW_EXCHANGE, DIRECT_TYPE);
 			channel.queueBind(QUEUE_A, NEW_EXCHANGE, ROUTE_A);
-
+	
 			QueueingConsumer qc = new QueueingConsumer(channel);
 			channel.basicConsume(QUEUE_A, true, qc);
-
+	
 			while (true)
 			{
 				QueueingConsumer.Delivery delivery = qc.nextDelivery();
 				String message = new String(delivery.getBody());
 				logger.info("message： " + message);
 			}
-
+	
 		} catch (IOException e)
 		{
 			// TODO Auto-generated catch block
